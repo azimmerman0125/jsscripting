@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-let DEBUG=false;
+const DEBUG=false;
 
 //Will return the different of the previous year from the current year population growth
 function calculateYearGrowth (previous, current) {
