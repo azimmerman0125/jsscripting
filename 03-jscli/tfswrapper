@@ -1,0 +1,75 @@
+#!/usr/bin/env node
+
+const { execSync } = require('child_process');
+const shell = (cmd) => execSync(cmd, { encoding: 'utf8' });
+const fs = require ("fs");
+
+var AWS = require("aws-sdk");
+var READLINE = require('readline');
+
+const AWS_USE_PROFILE="demo";
+const PATH_TO_CREDENTIALS="/Users/zimmy125/.aws/credentials";
+
+// FUNCTIONS
+
+function executableIsAvailable(name){
+    let msg = "Checking for executable";
+    process.stdout.write (`${msg}: ${name}`)
+    READLINE.cursorTo(process.stdout, 0);
+    try{ 
+        shell(`which ${name}`); 
+        process.stdout.write (`${msg}: ${name} - OK` + "\n");
+
+    }
+    catch(error){
+        process.stdout.write (`${msg}: ${name} - FAILED` + "\n");
+        console.log();
+        console.debug (error);
+        process.exit(1);
+    }
+}
+
+function readAWSCredentials(file, profile) {
+    if (arguments.length != 2) {
+        console.error ("Missing parameters for function: readAWSCredential <path> <profile>");
+        process.exit(1);
+    }    
+    
+    let msg = "Checking for AWS Credentials File";
+    process.stdout.write (`${msg}: ${file}`)
+    READLINE.cursorTo(process.stdout, 0);
+
+    try {
+        // process.env.AWS_PROFILE = AWS_USE_PROFILE;
+        // AWS.config.getCredentials(function(err,data) {
+        //     if (err) throw new Error (err.message);
+        //     // credentials not loaded
+        //   });
+
+        var credentials = new AWS.SharedIniFileCredentials({profile: 'demo'});
+        AWS.config.credentials = credentials;
+
+          process.stdout.write (`${msg}: ${file} - OK - Found Access Key: ${AWS.config.credentials.accessKeyId}` + "\n")
+    }
+    catch (error) {
+        process.stdout.write (`${msg}: ${file} - FAILED` + "\n")
+        console.debug (error);
+        process.exit(1);
+    }
+    
+}
+
+
+
+// END FUNCTIONS
+
+//Check to see if required dependent binaries are installed and in path 
+executableIsAvailable('brew');
+executableIsAvailable('tfenv');
+
+//Get Credentials
+readAWSCredentials(PATH_TO_CREDENTIALS, AWS_USE_PROFILE);
+
+//Set Credentials for Terraform
+
+

@@ -1,0 +1,23 @@
+{
+  "name": "tfswrapper",
+  "version": "0.0.1",
+  "description": "This is a Terraform Wrapper Script",
+  "main": "index.js",
+  "scripts": {
+    "test": "tfwrapper test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/azimmerman0125/jsscripting.git"
+  },
+  "author": "Adam Zimmerman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/azimmerman0125/jsscripting/issues"
+  },
+  "homepage": "https://github.com/azimmerman0125/jsscripting#readme",
+  "dependencies": {
+    "aws-sdk": "^2.1637.0",
+    "eslint": "^9.4.0"
+  }
+}
