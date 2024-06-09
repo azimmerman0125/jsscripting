@@ -6,19 +6,22 @@ const fs = require ("fs");
 
 var AWS = require("aws-sdk");
 var READLINE = require('readline');
+const { log } = require('console');
+//Suppress the AWS SDK Warning
+process.env.AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE = '1';
 
 const AWS_USE_PROFILE="demo";
-const PATH_TO_CREDENTIALS="/Users/zimmy125/.aws/credentials";
+const DEBUG=false;
 
 // FUNCTIONS
 
 function executableIsAvailable(name){
     let msg = "Checking for executable";
-    process.stdout.write (`${msg}: ${name}`)
+    (DEBUG == true) && process.stdout.write (`${msg}: ${name}`)
     READLINE.cursorTo(process.stdout, 0);
     try{ 
         shell(`which ${name}`); 
-        process.stdout.write (`${msg}: ${name} - OK` + "\n");
+        (DEBUG == true) && process.stdout.write (`${msg}: ${name} - OK` + "\n");
 
     }
     catch(error){
@@ -29,34 +32,41 @@ function executableIsAvailable(name){
     }
 }
 
-function readAWSCredentials(file, profile) {
-    if (arguments.length != 2) {
-        console.error ("Missing parameters for function: readAWSCredential <path> <profile>");
+function readAWSCredentials(profile) {
+    if (arguments.length != 1) {
+        console.error ("Missing parameters for function: readAWSCredential <profile>");
         process.exit(1);
     }    
     
-    let msg = "Checking for AWS Credentials File";
-    process.stdout.write (`${msg}: ${file}`)
+    let msg = "Checking for AWS Credentials Profile: " + `${profile}`;
+    (DEBUG == true) && process.stdout.write (`${msg}`)
     READLINE.cursorTo(process.stdout, 0);
 
     try {
-        // process.env.AWS_PROFILE = AWS_USE_PROFILE;
-        // AWS.config.getCredentials(function(err,data) {
-        //     if (err) throw new Error (err.message);
-        //     // credentials not loaded
-        //   });
-
-        var credentials = new AWS.SharedIniFileCredentials({profile: 'demo'});
+        var credentials = new AWS.SharedIniFileCredentials({profile: profile});
         AWS.config.credentials = credentials;
 
-          process.stdout.write (`${msg}: ${file} - OK - Found Access Key: ${AWS.config.credentials.accessKeyId}` + "\n")
+        (DEBUG == true) && process.stdout.write (`${msg} - OK ` + "\n");
+        (DEBUG == true) && process.stdout.write (`    - Found Access Key: ${AWS.config.credentials.accessKeyId}` + "\n")
     }
     catch (error) {
-        process.stdout.write (`${msg}: ${file} - FAILED` + "\n")
+        process.stdout.write (`${msg} - FAILED` + "\n")
         console.debug (error);
         process.exit(1);
     }
     
+}
+
+function processArgv (args) {
+    if (arguments.length < 1) {
+        console.error ("Missing parameters for function: processArgv <args>");
+        process.exit(1);
+    }
+    
+    let aList = args;
+    aList.shift();
+    aList.shift();
+    return aList;
 }
 
 
@@ -66,10 +76,24 @@ function readAWSCredentials(file, profile) {
 //Check to see if required dependent binaries are installed and in path 
 executableIsAvailable('brew');
 executableIsAvailable('tfenv');
+executableIsAvailable('terraform')
 
 //Get Credentials
-readAWSCredentials(PATH_TO_CREDENTIALS, AWS_USE_PROFILE);
+readAWSCredentials(AWS_USE_PROFILE);
 
-//Set Credentials for Terraform
+//Get all arguments and pass them to Terraform
+const argList = processArgv(process.argv);
+(DEBUG == true) && console.log (`Arguments Passed to Terraform: ${argList}`)
+const cmd = "terraform " + argList;
+
+//Couldn't figure out how to get us-east-1 programmaticaly.  Hard-coded it for demo purposes.
+// AWS.config.update({region:'us-east-1'});
+// console.log ("AWS Region: " + "us-east-1");
+// process.env.AWS_REGION = AWS.config.AWS_REGION;
+
+process.env.AWS_ACCESS_KEY_ID = AWS.config.credentials.accessKeyId;
+process.env.AWS_SECRET_ACCESS_KEY = AWS.config.credentials.secretAccessKey;
+process.env.AWS_REGION = "us-east-1";
+execSync(cmd, {stdio: 'inherit'});
 
 
