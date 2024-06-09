@@ -7,7 +7,6 @@ export default [
        languageOptions: {
             globals: {
                 "console" : "readonly",
-                "fetch" : "readonly",
             },
         },
  

@@ -10,11 +10,7 @@
   "description": "",
   "dependencies": {
     "eslint": "^9.4.0",
-    "esm": "^3.2.25",
     "node-fetch": "^3.3.2"
   },
-  "type": "module",
-  "esm": {
-    "await": true
-  }
+  "type": "module"
 }
