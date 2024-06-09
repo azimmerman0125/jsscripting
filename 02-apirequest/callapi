@@ -1,13 +1,6 @@
 #!/usr/bin/env node
 
-// To run this script as: ./callapi
-// 1. esm [npm install esm] package must be installed 
-// 2. "type" : "module" must be at root level in package.json
-/* 3. the following block must be at the root level in package.json as well:
-    "esm": {
-        "await": true
-    }
-*/
+let DEBUG=false;
 
 //Will return the different of the previous year from the current year population growth
 function calculateYearGrowth (previous, current) {
@@ -26,7 +19,7 @@ function calculateYearGrowth (previous, current) {
   
       const yearData = await res.json();
  
-      console.log(yearData);
+      (DEBUG == true) && console.debug(yearData);
 
       let prevYearPop = -1;
       let yearInfo = {};
