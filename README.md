@@ -12,7 +12,10 @@ cd jsscripting
 
 How to run this tool:
 ```
+- Change directory to project
 cd 01-hellowold
+
+-Run Tool:
 ./helloworld
 
 ``` 
@@ -22,7 +25,11 @@ cd 01-hellowold
 
 How to run this tool:
 ```
+- Change directory to project
 cd 02-apirequest
+
+- Install npm packages
+npm install
 
 - Run ESLint
 npx eslint callapi
@@ -33,14 +40,33 @@ npx eslint callapi
 
 
 ## Script 3: 03-jscli
-> This script will serve as a wrapper aroud the Terraform binary.  It will allow a developer to not focus on credentials for running the terraform command.  It will also run a validate and format for terraform before running a plan.
+> This script will serve as a wrapper aroud the Terraform binary.  It will allow a developer to not focus on credentials for running the terraform command.
+
+
+- Make sure that AWS cli is configured for demo profile
+```
+aws sts get-caller-identity --profile demo
+
+{
+    "UserId": "AIDAXXXXXXXXXX",
+    "Account": "ZZZZZZZZZZZ",
+    "Arn": "arn:aws:iam::ZZZZZZZZZZZ:user/demouser"
+}
+```
+
 
 How to run this tool:
 ```
+- Change directory to project
 cd 03-jscli
 
-- Run ESLint
-npx eslint tfwrapper
+- Install packages
+npm install
 
-- Run the tool
-./tfwrapper
+- Run the tool with valid terraform
+cd 03-jscli/terraform
+../tfwrapper init
+../tfwrapper plan
+../tfwrapper apply
+../tfwrapper state list
+../tfwrapper destroy
