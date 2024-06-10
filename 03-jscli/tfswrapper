@@ -9,7 +9,6 @@ const REPO_JSON="repo.json";
 const { execSync } = require('child_process');
 const shell = (cmd) => execSync(cmd, { encoding: 'utf8' });
 const fs = require ("fs");
-const { log } = require('console');
 
 var AWS = require("aws-sdk");
 var READLINE = require('readline');
@@ -21,7 +20,7 @@ process.env.AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE = '1';
 // FUNCTIONS
 function executableIsAvailable(name){
     let msg = "Checking for executable";
-    (DEBUG == true) && process.stdout.write (`${msg}: ${name}`)
+    (DEBUG == true) && process.stdout.write (`${msg}: ${name}`);
     READLINE.cursorTo(process.stdout, 0);
     try{ 
         shell(`which ${name}`); 
@@ -43,7 +42,7 @@ function readAWSCredentials(profile) {
     }    
     
     let msg = "Checking for AWS Credentials Profile: " + `${profile}`;
-    (DEBUG == true) && process.stdout.write (`${msg}`)
+    (DEBUG == true) && process.stdout.write (`${msg}`);
     READLINE.cursorTo(process.stdout, 0);
 
     try {
@@ -51,10 +50,10 @@ function readAWSCredentials(profile) {
         AWS.config.credentials = credentials;
 
         (DEBUG == true) && process.stdout.write (`${msg} - OK ` + "\n");
-        (DEBUG == true) && process.stdout.write (`    - Found Access Key: ${AWS.config.credentials.accessKeyId}` + "\n")
+        (DEBUG == true) && process.stdout.write (`    - Found Access Key: ${AWS.config.credentials.accessKeyId}` + "\n");
     }
     catch (error) {
-        process.stdout.write (`${msg} - FAILED` + "\n")
+        process.stdout.write (`${msg} - FAILED` + "\n");
         console.debug (error);
         process.exit(1);
     }
@@ -86,7 +85,7 @@ function loadTfVersion() {
 //Check to see if required dependent binaries are installed and in path 
 executableIsAvailable('brew');
 executableIsAvailable('tfenv');
-executableIsAvailable('terraform')
+executableIsAvailable('terraform');
 
 //Get Credentials
 readAWSCredentials(AWS_USE_PROFILE);
@@ -100,7 +99,7 @@ const repoJson = loadRepoJson(REPO_JSON);
 
 
 //Switching to the version of terraform found in repo.json if TF VER is not active
-(DEBUG == true) && console.log (`COMPARE: TF ENV: ${tfEnvironment.terraform_version}  -- REPO TF:  ${repoJson.repo_dependencies.terraform}`)
+(DEBUG == true) && console.log (`COMPARE: TF ENV: ${tfEnvironment.terraform_version}  -- REPO TF:  ${repoJson.repo_dependencies.terraform}`);
 
 if ( tfEnvironment.terraform_version != repoJson.repo_dependencies.terraform ) {
     const tfenvcmd = "tfenv use " + repoJson.repo_dependencies.terraform;
@@ -113,9 +112,9 @@ if ( tfEnvironment.terraform_version != repoJson.repo_dependencies.terraform ) {
 //Get all CMD arguments and pass them to Terraform
 let argList = processArgv(process.argv);
 if (argList.length == 0) {
-  argList = "--help"
+  argList = "--help";
 }
-(DEBUG == true) && console.log (`Arguments Passed to Terraform: ${argList}`)
+(DEBUG == true) && console.log (`Arguments Passed to Terraform: ${argList}`);
 const tfcmd = "terraform " + argList;
 
 //Couldn't figure out how to get us-east-1 programmaticaly.  Hard-coded it for demo purposes.
