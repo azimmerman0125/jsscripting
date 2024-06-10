@@ -12,6 +12,7 @@ process.env.AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE = '1';
 
 const AWS_USE_PROFILE="demo";
 const DEBUG=false;
+const REPO_JSON="repo.json";
 
 // FUNCTIONS
 
@@ -69,6 +70,14 @@ function processArgv (args) {
     return aList;
 }
 
+function loadRepoJson (repojson) {
+    let config = fs.readFileSync(repojson);
+    return JSON.parse(config);
+}
+
+function loadTfVersion() {
+    return JSON.parse(execSync("terraform -version -json"));
+}
 
 
 // END FUNCTIONS
@@ -78,13 +87,35 @@ executableIsAvailable('brew');
 executableIsAvailable('tfenv');
 executableIsAvailable('terraform')
 
+
+
 //Get Credentials
 readAWSCredentials(AWS_USE_PROFILE);
 
+//Load TF Version
+tfEnvironment = loadTfVersion();
+(DEBUG == true) && console.log (`Found Terraform Version in path: ${tfEnvironment}`);
+
+//Load repo.json file
+const repoJson = loadRepoJson(REPO_JSON);
+
+(DEBUG == true) && console.log (`COMPARE: TF ENV: ${tfEnvironment.terraform_version}  -- REPO TF:  ${repoJson.repo_dependencies.terraform}`)
+//Switching to the version of terraform found in repo.json if TF VER is not active
+if ( tfEnvironment.terraform_version != repoJson.repo_dependencies.terraform ) {
+    const tfenvcmd = "tfenv use " + repoJson.repo_dependencies.terraform;
+    console.log ("Found Terraform Version: " + repoJson.repo_dependencies.terraform + " in repo");
+    console.log ("Setting up terraform before proceeding...");
+    execSync(tfenvcmd, {stdio: 'inherit'});
+}
+
+
 //Get all arguments and pass them to Terraform
-const argList = processArgv(process.argv);
+let argList = processArgv(process.argv);
+if (argList.length == 0) {
+  argList = "--help"
+}
 (DEBUG == true) && console.log (`Arguments Passed to Terraform: ${argList}`)
-const cmd = "terraform " + argList;
+const tfcmd = "terraform " + argList;
 
 //Couldn't figure out how to get us-east-1 programmaticaly.  Hard-coded it for demo purposes.
 // AWS.config.update({region:'us-east-1'});
@@ -94,6 +125,6 @@ const cmd = "terraform " + argList;
 process.env.AWS_ACCESS_KEY_ID = AWS.config.credentials.accessKeyId;
 process.env.AWS_SECRET_ACCESS_KEY = AWS.config.credentials.secretAccessKey;
 process.env.AWS_REGION = "us-east-1";
-execSync(cmd, {stdio: 'inherit'});
+execSync(tfcmd, {stdio: 'inherit'});
 
 
