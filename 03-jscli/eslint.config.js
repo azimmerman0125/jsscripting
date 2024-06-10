@@ -7,6 +7,7 @@ export default [
        languageOptions: {
             globals: {
                 "console" : "readonly",
+                "process" : true,
             },
         },
  

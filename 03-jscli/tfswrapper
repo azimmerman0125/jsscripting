@@ -1,26 +1,30 @@
 #!/usr/bin/env node
 
+//Load Required Modules
+import {execSync} from 'child_process';
+import fs from 'fs';
+import {loadSharedConfigFiles} from '@aws-sdk/shared-ini-file-loader';
+import * as readline from 'node:readline';
+
+
+
 // Configuration Parameters
 const AWS_USE_PROFILE="demo";
-const DEBUG=false;
+const DEBUG=true;
 const REPO_JSON="repo.json";
+var AWS_CREDENTIALS = {};
 
-//Load Required Modules
-const { execSync } = require('child_process');
+//Setup shell command
 const shell = (cmd) => execSync(cmd, { encoding: 'utf8' });
-const fs = require ("fs");
 
-var AWS = require("aws-sdk");
-var READLINE = require('readline');
-
-//Suppress the AWS SDK Warning
+// //Suppress the AWS SDK Warning
 process.env.AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE = '1';
 
 // FUNCTIONS
 function executableIsAvailable(name){
     let msg = "Checking for executable";
     (DEBUG == true) && process.stdout.write (`${msg}: ${name}`);
-    READLINE.cursorTo(process.stdout, 0);
+    readline.cursorTo(process.stdout, 0);
     try{ 
         shell(`which ${name}`); 
         (DEBUG == true) && process.stdout.write (`${msg}: ${name} - OK` + "\n");
@@ -34,30 +38,6 @@ function executableIsAvailable(name){
     }
 }
 
-function readAWSCredentials(profile) {
-    if (arguments.length != 1) {
-        console.error ("Missing parameters for function: readAWSCredential <profile>");
-        process.exit(1);
-    }    
-    
-    let msg = "Checking for AWS Credentials Profile: " + `${profile}`;
-    (DEBUG == true) && process.stdout.write (`${msg}`);
-    READLINE.cursorTo(process.stdout, 0);
-
-    try {
-        var credentials = new AWS.SharedIniFileCredentials({profile: profile});
-        AWS.config.credentials = credentials;
-
-        (DEBUG == true) && process.stdout.write (`${msg} - OK ` + "\n");
-        (DEBUG == true) && process.stdout.write (`    - Found Access Key: ${AWS.config.credentials.accessKeyId}` + "\n");
-    }
-    catch (error) {
-        process.stdout.write (`${msg} - FAILED` + "\n");
-        console.debug (error);
-        process.exit(1);
-    }
-    
-}
 
 function processArgv (args) {
     if (arguments.length < 1) {
@@ -73,6 +53,7 @@ function processArgv (args) {
 
 function loadRepoJson (repojson) {
     let config = fs.readFileSync(repojson);
+    //(DEBUG == true) && console.log (JSON.parse(config)); 
     return JSON.parse(config);
 }
 
@@ -87,13 +68,19 @@ executableIsAvailable('tfenv');
 executableIsAvailable('terraform');
 
 //Get Credentials
-readAWSCredentials(AWS_USE_PROFILE);
+let region = (await loadSharedConfigFiles()).configFile?.[AWS_USE_PROFILE]?.region;
+let creds = (await loadSharedConfigFiles()).credentialsFile?.[AWS_USE_PROFILE];
+AWS_CREDENTIALS = {
+    "aws_access_key_id" : creds.aws_access_key_id,
+    "aws_secret_access_key" : creds.aws_secret_access_key,
+    "region" : region
+  };
 
 //Load TF Version
-tfEnvironment = loadTfVersion();
-(DEBUG == true) && console.log (`Found Terraform Version in path: ${tfEnvironment}`);
+const tfEnvironment = loadTfVersion();
+(DEBUG == true) && console.log (`Found Terraform Version in path: ${tfEnvironment.terraform_version}`);
 
-//Load repo.json file
+// //Load repo.json file
 const repoJson = loadRepoJson(REPO_JSON);
 
 
@@ -124,9 +111,9 @@ if (argList.length == 0) {
 const tfcmd = "terraform " + argList;
 
 //Run the Terraform command with the parameters provided on command line
-process.env.AWS_ACCESS_KEY_ID = AWS.config.credentials.accessKeyId;
-process.env.AWS_SECRET_ACCESS_KEY = AWS.config.credentials.secretAccessKey;
-process.env.AWS_REGION = "us-east-1";
+process.env.AWS_ACCESS_KEY_ID = AWS_CREDENTIALS.aws_access_key_id;
+process.env.AWS_SECRET_ACCESS_KEY = AWS_CREDENTIALS.aws_secret_access_key;
+process.env.AWS_REGION = AWS_CREDENTIALS.region;
 execSync(tfcmd, {stdio: 'inherit'});
 
 
