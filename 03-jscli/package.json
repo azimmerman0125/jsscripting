@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "This is a Terraform Wrapper Script",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "tfwrapper test"
   },
