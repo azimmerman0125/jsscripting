@@ -1,5 +1,11 @@
 # Collection of Scripts to show how to use NodeJS and JavaScript as a scripting tool
 
+## Node JS Used
+```
+node --version
+v18.20.3
+```
+
 ## Download Scripts
 ```
 git clone https://github.com/azimmerman0125/jsscripting.git
