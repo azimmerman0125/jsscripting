@@ -1,0 +1,6 @@
+{ 
+  "repo_name" : "tfswrapper",
+  "repo_dependencies" : {
+      "terraform" :  "1.5.1"
+  }
+}
