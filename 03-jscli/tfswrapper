@@ -16,7 +16,6 @@ var READLINE = require('readline');
 //Suppress the AWS SDK Warning
 process.env.AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE = '1';
 
-
 // FUNCTIONS
 function executableIsAvailable(name){
     let msg = "Checking for executable";
@@ -69,7 +68,7 @@ function processArgv (args) {
     let aList = args;
     aList.shift();
     aList.shift();
-    return aList;
+    return aList.join(' ');
 }
 
 function loadRepoJson (repojson) {
@@ -109,22 +108,22 @@ if ( tfEnvironment.terraform_version != repoJson.repo_dependencies.terraform ) {
 }
 
 
+// TODO: Run Terraform fmt
+
+// TODO: Run Terraform validate
+
+// TODO: Send usage to HoneyComb.io for Telemetry and Usage stats for observability
+
+
 //Get all CMD arguments and pass them to Terraform
 let argList = processArgv(process.argv);
 if (argList.length == 0) {
-  argList = "--help";
+    argList = "--help";
 }
 (DEBUG == true) && console.log (`Arguments Passed to Terraform: ${argList}`);
 const tfcmd = "terraform " + argList;
 
-//Couldn't figure out how to get us-east-1 programmaticaly.  Hard-coded it for demo purposes.
-// AWS.config.update({region:'us-east-1'});
-// console.log ("AWS Region: " + "us-east-1");
-// process.env.AWS_REGION = AWS.config.AWS_REGION;
-
-
-// TODO: Send usage to HoneyComb.io for Telemetry and Usage stats for observability
-
+//Run the Terraform command with the parameters provided on command line
 process.env.AWS_ACCESS_KEY_ID = AWS.config.credentials.accessKeyId;
 process.env.AWS_SECRET_ACCESS_KEY = AWS.config.credentials.secretAccessKey;
 process.env.AWS_REGION = "us-east-1";
