@@ -60,6 +60,30 @@ function loadRepoJson (repojson) {
 function loadTfVersion() {
     return JSON.parse(execSync("terraform -version -json"));
 }
+
+async function returnConfigFile() {
+    let configFile = (await loadSharedConfigFiles());
+    return configFile;
+}
+
+async function loadAWSCredentials(profile) {
+    //Calling async returnConfigFile
+    let sharedConfigFile = (async function() {
+        let awaitConfigFile = (await returnConfigFile())
+        return awaitConfigFile;
+    })();
+    const scf = (await sharedConfigFile);
+    const output = JSON.parse(JSON.stringify(scf));
+    //console.log ("DEBUG: " + JSON.stringify(output));
+
+    let credentials = {
+        'aws_access_key_id' : output.credentialsFile[profile].aws_access_key_id,
+        'aws_secret_access_key' : output.credentialsFile[profile].aws_secret_access_key,
+        'region' : output.configFile[profile].region
+    }
+
+    return JSON.parse(JSON.stringify(credentials));
+}
 // END FUNCTIONS
 
 //Check to see if required dependent binaries are installed and in path 
@@ -68,13 +92,7 @@ executableIsAvailable('tfenv');
 executableIsAvailable('terraform');
 
 //Get Credentials
-let region = (await loadSharedConfigFiles()).configFile?.[AWS_USE_PROFILE]?.region;
-let creds = (await loadSharedConfigFiles()).credentialsFile?.[AWS_USE_PROFILE];
-AWS_CREDENTIALS = {
-    "aws_access_key_id" : creds.aws_access_key_id,
-    "aws_secret_access_key" : creds.aws_secret_access_key,
-    "region" : region
-  };
+AWS_CREDENTIALS = (await loadAWSCredentials(AWS_USE_PROFILE));
 
 //Load TF Version
 const tfEnvironment = loadTfVersion();
