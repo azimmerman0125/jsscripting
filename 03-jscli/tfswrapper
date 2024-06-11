@@ -60,6 +60,59 @@ function loadRepoJson (repojson) {
 function loadTfVersion() {
     return JSON.parse(execSync("terraform -version -json"));
 }
+
+async function returnConfigFile () {
+    let configFile = (await loadSharedConfigFiles());
+    return configFile;
+
+}
+
+var cf = {};
+cf = (async function() {
+    let jimBob = (await returnConfigFile())
+    return jimBob;
+})();
+const foo = (await cf);
+// cf.then(x => {
+//     console.log ("ESWAR: " + x.region);
+// })
+
+const output = JSON.parse(JSON.stringify(foo));
+
+//const output = JSON.stringify(foo);
+let demo = output.credentialsFile["demo"];
+console.log ("waited for returnConfigFile function " + JSON.stringify(demo));
+console.log (output.credentialsFile["demo"]);
+console.log (demo);
+
+async function returnRegion () {
+    let region = (await loadSharedConfigFiles()).configFile?.['demo']?.region;
+    return region;
+
+}
+
+//var REG = returnRegion();
+//console.log (REG);
+
+//POTENTIAL
+var blah = {};
+blah = (async function() {
+    let jim = (await returnRegion())
+    return jim;
+})();
+const test = (await blah);
+console.log (`waited for blah async function ${test}`);
+
+
+var blah1
+returnRegion().then (x => {
+    console.log(`this is a then ${x}`);
+    
+})
+console.log (`this is ${blah1}`);
+
+
+
 // END FUNCTIONS
 
 //Check to see if required dependent binaries are installed and in path 
