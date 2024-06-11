@@ -10,7 +10,7 @@ import * as readline from 'node:readline';
 
 // Configuration Parameters
 const AWS_USE_PROFILE="demo";
-const DEBUG=true;
+const DEBUG=false;
 const REPO_JSON="repo.json";
 var AWS_CREDENTIALS = {};
 
@@ -93,8 +93,8 @@ function setTFEnvironment (tfEnv, tfRepo) {
 
     if ( tfEnv != tfRepo ) {
         const tfenvcmd = "tfenv use " + tfRepo;
-        console.log ("Found Terraform Version: " + tfRepo + " in repo");
-        console.log ("Setting up terraform before proceeding...");
+        (DEBUG == true) && console.log ("Found Terraform Version: " + tfRepo + " in repo");
+        (DEBUG == true) && console.log ("Setting up terraform before proceeding...");
         execSync(tfenvcmd, {stdio: 'inherit'});
     }
 }
