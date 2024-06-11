@@ -3,7 +3,7 @@
 ## Node JS Used
 ```
 node --version
-v18.20.3
+v22.2.0
 ```
 
 ## Download Scripts
